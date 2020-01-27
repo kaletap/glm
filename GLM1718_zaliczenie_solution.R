@@ -117,12 +117,24 @@ summary(model_poiss3)
 anova(model_poiss, model_poiss3, test="Chi")  # najmniejsza wartość testu Chi
 goodness_of_fit(model_poiss3, model_null_poiss)  # najmniejsza dewiancja! najlepiej dopasownany model
 
-## c)
 # zależność płeć - palenie
 model_poiss4 <- glm(count ~ lek + plec * pal, family=poisson, data=df)
 summary(model_poiss4)
 anova(model_poiss, model_poiss4, test="Chi")  # jakaś zależność jest, ale dużo mniejsza
 goodness_of_fit(model_poiss4, model_null_poiss)
+
+## c)
+# warunkowa zależność płeć-palenie
+xtabs(count ~ plec + pal + lek, df)
+# z tabelek widać, że jeżeli ustalimy zmienną lek to nie ma zbyt dużej zależności między
+# płcią a tym czy ktoś pali dla nie leczących się osób (proporcje są podobne).
+# dla osób leczących się próbka jest mniejsza, widać że kobiety palą trochę więcej, ale nie jesteśmy
+# pewni czy jest to istotne statystycznie. Sprawdzimy czy dodanie kolejnej interakcji wyjaśni ten model
+# (w stosunku do pojedynczej zaleznosci plec-lek)
+model_poiss5 <- glm(count ~ plec*pal + plec*lek, family=poisson, data=df)
+summary(model_poiss5)
+anova(model_poiss3, model_poiss5, test="Chi")
+# p-value jest poniżej 0.05, ale dość duże. Możliwe, że jest zależność warunkowa.
 
 # Podsumowując: każdy model z interakcjami był istotnie lepszy od modelu bez.
 # Najlepiej dopasowany (pod względem Chi^2 oraz dewiancji) był model z interakcją płeć-lek,
@@ -137,3 +149,4 @@ tab <- xtabs(count ~ lek + plec, marginal_df)
 # Te obserwację potwierdziliśmy też modelem poissona i testami statystycznymi.
 
 # Pytanie: Po co te wszystkie testy? Nie wystarczy popatrzeć na tabelkę?
+
